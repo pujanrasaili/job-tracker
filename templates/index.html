@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Job Application Tracker</h1>
+            <a href="/add" class="btn-add">+ Add Job</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">Total: {{ jobs|length }}</div>
+            <div class="stat-card">Applied: {{ jobs|selectattr('status','equalto','Applied')|list|length }}</div>
+            <div class="stat-card">Interview: {{ jobs|selectattr('status','equalto','Interview')|list|length }}</div>
+            <div class="stat-card">Offer: {{ jobs|selectattr('status','equalto','Offer')|list|length }}</div>
+            <div class="stat-card">Rejected: {{ jobs|selectattr('status','equalto','Rejected')|list|length }}</div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Location</th>
+                        <th>Date Applied</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td><strong>{{ job['company'] }}</strong></td>
+                        <td>{{ job['role'] }}</td>
+                        <td>{{ job['location'] }}</td>
+                        <td>{{ job['date_applied'] }}</td>
+                        <td>
+                            <form action="/update/{{ job['id'] }}" method="POST">
+                                <select name="status" onchange="this.form.submit()" class="status-{{ job['status']|lower }}">
+                                    <option {% if job['status']=='Applied' %}selected{% endif %}>Applied</option>
+                                    <option {% if job['status']=='Interview' %}selected{% endif %}>Interview</option>
+                                    <option {% if job['status']=='Offer' %}selected{% endif %}>Offer</option>
+                                    <option {% if job['status']=='Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                            {% if job['link'] %}
+                            <a href="{{ job['link'] }}" target="_blank" class="btn-link">View</a>
+                            {% endif %}
+                            <a href="/delete/{{ job['id'] }}" class="btn-delete" onclick="return confirm('Delete this job?')">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if jobs|length == 0 %}
+                    <tr><td colspan="6" class="empty-state">No jobs yet. Click "+ Add Job" to get started! 🎯</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
